@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">registroDeRiscos</string>
+    <string name="entrar">Entrar</string>
+    <string name="login">Bem-vindo</string>
 </resources>
