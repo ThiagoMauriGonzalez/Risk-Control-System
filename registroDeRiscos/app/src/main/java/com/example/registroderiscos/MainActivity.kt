@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         val textCadastro = findViewById<TextView>(R.id.textCadastro)
         textCadastro.setOnClickListener {
             // Redirecionar para outra tela de cadastro
-            val intent = Intent(this, activityResultRegistry::class.java)
+            val intent = Intent(this, CadastroActivity::class.java)
             startActivity(intent)
         }
 
