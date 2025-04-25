@@ -26,7 +26,16 @@ class   MainActivity : AppCompatActivity() {
         loginButton = findViewById(R.id.button)
 
         loginButton.setOnClickListener {
-            performLogin()
+            val email = emailInput.text.toString().trim()
+            val password = passwordInput.text.toString().trim()
+
+            if (validateInputs(email, password) && authenticateUser(email, password)) {
+                // Ir para a tela de riscos registrados
+                startActivity(Intent(this, RiscosRegistradosActivity::class.java))
+                finish()
+            } else {
+                Toast.makeText(this, "Credenciais inválidas.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         val textCadastro = findViewById<TextView>(R.id.textCadastro)
@@ -37,8 +46,8 @@ class   MainActivity : AppCompatActivity() {
         }
 
     }
-
-    private fun performLogin() {
+/*
+    private fun performLogin() : Boolean {
         val email = emailInput.text.toString().trim()
         val password = passwordInput.text.toString().trim()
 
@@ -58,7 +67,8 @@ class   MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Login falhou. Verifique suas credenciais.", Toast.LENGTH_SHORT).show()
             }
         }
-    }
+        return
+    } */
 
     private fun validateInputs(email: String, password: String): Boolean {
         return when {
