@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollRiscoRegistrado"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF">
@@ -32,7 +33,6 @@
             android:padding="12dp"
             android:layout_marginBottom="12dp"
             android:elevation="2dp"
-            android:backgroundTint="#E9F3FB"
             android:clipToPadding="false"
             android:layout_marginHorizontal="4dp"
             android:layout_gravity="center">
@@ -57,8 +57,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:justifyContent="space-between">
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/btnVerDetalhes"

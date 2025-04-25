@@ -17,7 +17,7 @@ class CadastroActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_cadastro)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.scrollCadastro)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -68,7 +68,7 @@ class CadastroActivity : AppCompatActivity() {
 
     private fun validarCampos(): Boolean {
         val nomeInput = findViewById<TextInputLayout>(R.id.editNome)
-        val emailInput = findViewById<TextInputLayout>(R.id.editE_mail)
+        val emailInput = findViewById<TextInputLayout>(R.id.editEmail)
         val cpfInput = findViewById<TextInputLayout>(R.id.editCPF)
         val senhaInput = findViewById<TextInputLayout>(R.id.editSenha)
         val setorInput = findViewById<TextInputLayout>(R.id.editSetor)
