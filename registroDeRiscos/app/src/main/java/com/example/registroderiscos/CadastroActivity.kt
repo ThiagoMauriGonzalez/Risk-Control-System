@@ -1,6 +1,7 @@
 package com.example.registroderiscos
 
 import android.os.Bundle
+import android.content.Intent
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
@@ -24,6 +25,7 @@ class CadastroActivity : AppCompatActivity() {
         }
 
         val btnCadastrar = findViewById<Button>(R.id.btnCadastrar)
+        val btnCancelar = findViewById<Button>(R.id.btnCancelar)
         val cpfInput = findViewById<TextInputLayout>(R.id.editCPF)
 
         //aplica a máscara no campo CPF
@@ -32,7 +34,16 @@ class CadastroActivity : AppCompatActivity() {
         btnCadastrar.setOnClickListener {
             if (validarCampos()) {
                 Toast.makeText(this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
+                // Ir para a tela de login
+                startActivity(Intent(this, MainActivity::class.java))
+                finish() // fecha a tela de cadastro
             }
+        }
+
+        btnCancelar.setOnClickListener {
+            // Volta para a tela de login
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 
