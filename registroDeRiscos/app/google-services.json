@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496548177336",
+    "project_id": "registroder",
+    "storage_bucket": "registroder.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496548177336:android:b80c5b4e387baff8b79b4d",
+        "android_client_info": {
+          "package_name": "com.example.registroderiscos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjc4UebBr4IS7dSu-rikCxHKyTi8dAgeY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
