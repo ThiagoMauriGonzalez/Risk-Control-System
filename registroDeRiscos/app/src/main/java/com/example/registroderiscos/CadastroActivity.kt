@@ -11,10 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
+
 
 class CadastroActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
         enableEdgeToEdge()
         setContentView(R.layout.activity_cadastro)
 
@@ -33,10 +38,21 @@ class CadastroActivity : AppCompatActivity() {
 
         btnCadastrar.setOnClickListener {
             if (validarCampos()) {
-                Toast.makeText(this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
-                // Ir para a tela de login
-                startActivity(Intent(this, MainActivity::class.java))
-                finish() // fecha a tela de cadastro
+                val email = findViewById<TextInputLayout>(R.id.editEmail).editText?.text.toString().trim()
+                val senha = findViewById<TextInputLayout>(R.id.editSenha).editText?.text.toString().trim()
+
+                auth.createUserWithEmailAndPassword(email, senha)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
+                            // Vai para a tela de login
+                            startActivity(Intent(this, MainActivity::class.java))
+                            finish()
+                        } else {
+                            Toast.makeText(this, "Erro ao cadastrar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+
             }
         }
 

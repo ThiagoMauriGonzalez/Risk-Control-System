@@ -8,8 +8,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
 
 class   MainActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
     private lateinit var emailInput: TextInputEditText
     private lateinit var passwordInput: TextInputEditText
     private lateinit var loginButton: Button
@@ -17,6 +19,7 @@ class   MainActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        auth = FirebaseAuth.getInstance()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -31,14 +34,21 @@ class   MainActivity : AppCompatActivity() {
             val email = emailInput.text.toString().trim()
             val password = passwordInput.text.toString().trim()
 
-            if (validateInputs(email, password) && authenticateUser(email, password)) {
-                // Ir para a tela de riscos registrados
-                startActivity(Intent(this, RiscosRegistradosActivity::class.java))
-                finish()
-            } else {
-                Toast.makeText(this, "Credenciais inválidas.", Toast.LENGTH_SHORT).show()
+            if (validateInputs(email, password)) {
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // Login bem-sucedido
+                            startActivity(Intent(this, RiscosRegistradosActivity::class.java))
+                            finish()
+                        } else {
+                            // Falha no login (senha errada, usuário não existe, etc)
+                            Toast.makeText(this, "E-mail ou senha incorretos.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
         }
+
 
         val textCadastro = findViewById<TextView>(R.id.textCadastro)
         textCadastro.setOnClickListener {
@@ -90,10 +100,20 @@ class   MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun authenticateUser(email: String, password: String): Boolean {
-
-        return email == "usuario@kotlin.com" && password == "1234"
-
-
+    private fun authenticateUser(email: String, password: String) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Login bem-sucedido
+                    startActivity(Intent(this, RiscosRegistradosActivity::class.java))
+                    finish()
+                } else {
+                    // Login falhou (senha ou email inválido)
+                    Toast.makeText(this, "E-mail ou senha incorretos.", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
+
+
+
 }
