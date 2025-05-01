@@ -45,7 +45,7 @@ class RegistroDeRiscos : AppCompatActivity() {
         spinnerTipo.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, tipos)
 
         // Preencher spinner de Nível
-        val niveis = arrayOf("1 - Baixo", "2", "3", "4", "5 - Crítico")
+        val niveis = arrayOf("1 - Baixo", "2"       , "3", "4", "5 - Crítico")
         spinnerNivel.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, niveis)
 
         // Selecionar imagem

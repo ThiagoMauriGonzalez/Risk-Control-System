@@ -1,63 +1,64 @@
 package com.example.registroderiscos
 
-import android.os.Bundle
 import android.content.Intent
+import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+
 
 
 class CadastroActivity : AppCompatActivity() {
-    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        auth = FirebaseAuth.getInstance()
-        enableEdgeToEdge()
         setContentView(R.layout.activity_cadastro)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.scrollCadastro)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
         val btnCadastrar = findViewById<Button>(R.id.btnCadastrar)
         val btnCancelar = findViewById<Button>(R.id.btnCancelar)
         val cpfInput = findViewById<TextInputLayout>(R.id.editCPF)
 
-        //aplica a máscara no campo CPF
+        // Máscara no CPF
         cpfInput.editText?.addTextChangedListener(cpfMaskWatcher())
 
         btnCadastrar.setOnClickListener {
             if (validarCampos()) {
+                val nome = findViewById<TextInputLayout>(R.id.editNome).editText?.text.toString().trim()
                 val email = findViewById<TextInputLayout>(R.id.editEmail).editText?.text.toString().trim()
+                val cpf = findViewById<TextInputLayout>(R.id.editCPF).editText?.text.toString().trim()
                 val senha = findViewById<TextInputLayout>(R.id.editSenha).editText?.text.toString().trim()
+                val setor = findViewById<TextInputLayout>(R.id.editSetor).editText?.text.toString().trim()
 
-                auth.createUserWithEmailAndPassword(email, senha)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
-                            // Vai para a tela de login
-                            startActivity(Intent(this, MainActivity::class.java))
-                            finish()
-                        } else {
-                            Toast.makeText(this, "Erro ao cadastrar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                        }
+                val database = FirebaseDatabase.getInstance()
+                val ref = database.getReference("usuario")
+
+                val userId = ref.push().key ?: cpf // usa CPF como fallback
+                val userData = mapOf(
+                    "nome" to nome,
+                    "email" to email,
+                    "cpf" to cpf,
+                    "senha" to senha,
+                    "setor" to setor,
+                    "user_id" to userId
+                )
+
+                ref.child(userId).setValue(userData)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Cadastro salvo com sucesso!", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
                     }
-
+                    .addOnFailureListener {
+                        Toast.makeText(this, "Erro ao salvar: ${it.message}", Toast.LENGTH_LONG).show()
+                    }
             }
         }
 
         btnCancelar.setOnClickListener {
-            // Volta para a tela de login
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
@@ -73,7 +74,6 @@ class CadastroActivity : AppCompatActivity() {
                 if (isUpdating) return
 
                 isUpdating = true
-
                 val str = s.toString().filter { it.isDigit() }
                 var cpfComMascara = ""
                 var i = 0
@@ -86,7 +86,6 @@ class CadastroActivity : AppCompatActivity() {
                     cpfComMascara += str[i]
                     i++
                 }
-
                 s?.replace(0, s.length, cpfComMascara)
                 isUpdating = false
             }
