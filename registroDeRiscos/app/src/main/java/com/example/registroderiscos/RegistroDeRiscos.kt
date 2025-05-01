@@ -1,19 +1,17 @@
 package com.example.registroderiscos
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Base64
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import com.google.firebase.database.FirebaseDatabase
+import java.io.ByteArrayOutputStream
 
 class RegistroDeRiscos : AppCompatActivity() {
 
@@ -21,12 +19,21 @@ class RegistroDeRiscos : AppCompatActivity() {
     private lateinit var spinnerNivel: Spinner
     private lateinit var btnFoto: Button
     private lateinit var editLocal: EditText
-    private lateinit var btnLocalizacao: Button
+    private lateinit var editDescricao: EditText
+    private lateinit var btnEnviar: Button
+    private lateinit var btnCancelar: Button
 
-    private val selecionarImagem = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            Toast.makeText(this, "Imagem selecionada: ${it.lastPathSegment}", Toast.LENGTH_SHORT).show()
-            // Aqui você pode usar o URI como quiser
+    private var imagemBase64: String? = null
+
+    private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val imageUri = result.data?.data
+            imageUri?.let {
+                imagemBase64 = converterImagemParaBase64(it)
+                Toast.makeText(this, "Imagem carregada e convertida!", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Nenhuma imagem selecionada.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -38,44 +45,76 @@ class RegistroDeRiscos : AppCompatActivity() {
         spinnerNivel = findViewById(R.id.spinnerNivel)
         btnFoto = findViewById(R.id.btnFoto)
         editLocal = findViewById(R.id.editLocal)
-        btnLocalizacao = findViewById(R.id.btnCancelar) // usando o botão Cancelar como exemplo para localização
+        editDescricao = findViewById(R.id.editDescricao)
+        btnEnviar = findViewById(R.id.btnEnviar)
+        btnCancelar = findViewById(R.id.btnCancelar)
 
-        // Preencher spinner de Tipo
         val tipos = arrayOf("Químico", "Físico", "Ergonômico", "Biológico", "Outros")
         spinnerTipo.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, tipos)
 
-        // Preencher spinner de Nível
-        val niveis = arrayOf("1 - Baixo", "2"       , "3", "4", "5 - Crítico")
+        val niveis = arrayOf("1 - Baixo", "2", "3", "4", "5 - Crítico")
         spinnerNivel.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, niveis)
 
-        // Selecionar imagem
         btnFoto.setOnClickListener {
-            selecionarImagem.launch("image/*")
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            selecionarImagem.launch(intent)
         }
 
-        // Pegar localização atual
-        btnLocalizacao.setOnClickListener {
-            obterLocalizacao()
+        btnEnviar.setOnClickListener {
+            salvarNoFirebase()
+        }
+
+        btnCancelar.setOnClickListener {
+            startActivity(Intent(this, RiscosRegistradosActivity::class.java))
+            finish()
         }
     }
 
-    private fun obterLocalizacao() {
-        val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-        if (
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
+    private fun converterImagemParaBase64(uri: Uri): String {
+        val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
+        val inputStream = contentResolver.openInputStream(uri)
+        val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream)
+        val byteArray = stream.toByteArray()
+        val base64 = Base64.encodeToString(byteArray, Base64.NO_WRAP)
+
+        return "data:$mimeType;base64,$base64"
+    }
+
+
+    private fun salvarNoFirebase() {
+        val tipoRisco = spinnerTipo.selectedItem.toString()
+        val nivelRisco = spinnerNivel.selectedItem.toString()
+        val localizacao = editLocal.text.toString().trim()
+        val descricao = editDescricao.text.toString().trim()
+        val imagem = imagemBase64 ?: ""
+
+        if (descricao.isEmpty() || localizacao.isEmpty()) {
+            Toast.makeText(this, "Preencha a descrição e a localização.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val location: Location? = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        location?.let {
-            val latitude = it.latitude
-            val longitude = it.longitude
-            editLocal.setText("Lat: $latitude\nLon: $longitude")
-        } ?: run {
-            Toast.makeText(this, "Não foi possível obter a localização", Toast.LENGTH_SHORT).show()
-        }
+        val database = FirebaseDatabase.getInstance()
+        val referencia = database.getReference("risco")
+
+        val risco = mapOf(
+            "descricao" to descricao,
+            "foto" to imagem,
+            "localizacao" to localizacao,
+            "nivel_risco" to nivelRisco,
+            "tipo_risco" to tipoRisco
+        )
+
+        referencia.push().setValue(risco)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Risco salvo com sucesso!", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, RiscosRegistradosActivity::class.java))
+                finish()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 }
