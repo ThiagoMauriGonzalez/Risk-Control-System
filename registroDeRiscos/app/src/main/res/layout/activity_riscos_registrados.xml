@@ -98,5 +98,17 @@
             android:textSize="14sp"
             android:paddingHorizontal="24dp"
             android:paddingVertical="8dp" />
+
+        <Button
+            android:id="@+id/btnDeslogar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Deslogar"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="#339CFF"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="8dp" />
     </LinearLayout>
 </ScrollView>

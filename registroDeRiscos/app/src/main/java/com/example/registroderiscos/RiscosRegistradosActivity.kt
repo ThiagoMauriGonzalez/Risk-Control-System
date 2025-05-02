@@ -26,5 +26,13 @@ class RiscosRegistradosActivity : AppCompatActivity() {
             startActivity(Intent(this, RegistroDeRiscos::class.java))
             finish()
         }
+
+        val btnDeslog = findViewById<Button>(R.id.btnDeslogar)
+
+        btnDeslog.setOnClickListener{
+
+            startActivity((Intent(this, MainActivity::class.java)))
+            finish()
+        }
     }
 }
