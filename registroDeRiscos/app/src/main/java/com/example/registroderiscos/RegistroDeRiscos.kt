@@ -76,7 +76,7 @@ class RegistroDeRiscos : AppCompatActivity() {
         val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
 
         val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, stream)
         val byteArray = stream.toByteArray()
         val base64 = Base64.encodeToString(byteArray, Base64.NO_WRAP)
 

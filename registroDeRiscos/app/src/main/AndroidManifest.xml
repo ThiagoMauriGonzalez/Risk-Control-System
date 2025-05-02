@@ -16,9 +16,6 @@
             android:name=".RegistroDeRiscos"
             android:exported="false" />
         <activity
-            android:name=".RegistrodeRiscos"
-            android:exported="false" />
-        <activity
             android:name=".CadastroActivity"
             android:exported="false" />
         <activity
