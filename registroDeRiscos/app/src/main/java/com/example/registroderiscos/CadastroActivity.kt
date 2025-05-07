@@ -8,15 +8,19 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 
 
 class CadastroActivity : AppCompatActivity() {
 
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cadastro)
+        auth = FirebaseAuth.getInstance()
 
         val btnCadastrar = findViewById<Button>(R.id.btnCadastrar)
         val btnCancelar = findViewById<Button>(R.id.btnCancelar)
@@ -33,27 +37,33 @@ class CadastroActivity : AppCompatActivity() {
                 val senha = findViewById<TextInputLayout>(R.id.editSenha).editText?.text.toString().trim()
                 val setor = findViewById<TextInputLayout>(R.id.editSetor).editText?.text.toString().trim()
 
-                val database = FirebaseDatabase.getInstance()
-                val ref = database.getReference("usuario")
-
-                val userId = ref.push().key ?: cpf // usa CPF como fallback
-                val userData = mapOf(
-                    "nome" to nome,
-                    "email" to email,
-                    "cpf" to cpf,
-                    "senha" to senha,
-                    "setor" to setor,
-                    "user_id" to userId
-                )
-
-                ref.child(userId).setValue(userData)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Cadastro salvo com sucesso!", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, MainActivity::class.java))
-                        finish()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Erro ao salvar: ${it.message}", Toast.LENGTH_LONG).show()
+                // 1. Cria o usuário no Auth
+                auth.createUserWithEmailAndPassword(email, senha)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val userId = auth.currentUser?.uid ?: ""
+                            // 2. Salva os dados no Realtime Database usando o UID
+                            val database = FirebaseDatabase.getInstance()
+                            val ref = database.getReference("usuario")
+                            val userData = mapOf(
+                                "nome" to nome,
+                                "email" to email,
+                                "cpf" to cpf,
+                                "setor" to setor,
+                                "user_id" to userId
+                            )
+                            ref.child(userId).setValue(userData)
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "Cadastro salvo com sucesso!", Toast.LENGTH_SHORT).show()
+                                    startActivity(Intent(this, MainActivity::class.java))
+                                    finish()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(this, "Erro ao salvar: ${it.message}", Toast.LENGTH_LONG).show()
+                                }
+                        } else {
+                            Toast.makeText(this, "Erro ao cadastrar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                        }
                     }
             }
         }
