@@ -1,5 +1,6 @@
 package com.example.registroderiscos
 
+import Risco
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,8 +23,13 @@ class RiscoAdapter(private val riscos: List<Risco>) :
 
     override fun onBindViewHolder(holder: RiscoViewHolder, position: Int) {
         val risco = riscos[position]
+        val latLng = if (risco.latitude != null && risco.longitude != null) {
+            "Lat: %.5f, Lon: %.5f".format(risco.latitude, risco.longitude)
+        } else {
+            "Localização não disponível"
+        }
         holder.tvTipoRisco.text = risco.tipo_risco
-        holder.tvDetalhesRisco.text = "${risco.localizacao} · ${risco.nivel_risco}"
+        holder.tvDetalhesRisco.text = "${risco.localizacao} · ${risco.nivel_risco} · $latLng"
     }
 
     override fun getItemCount(): Int = riscos.size
