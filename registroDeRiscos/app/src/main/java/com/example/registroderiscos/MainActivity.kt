@@ -21,6 +21,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         auth = FirebaseAuth.getInstance()
 
+        if (auth.currentUser != null) {
+            startActivity(Intent(this, RiscosRegistradosActivity::class.java))
+            finish()
+            return
+        }
+
         val emailLayout = findViewById<TextInputLayout>(R.id.editEmail)
         val passwordLayout = findViewById<TextInputLayout>(R.id.editSenha)
         emailInput = emailLayout.editText as TextInputEditText
@@ -35,11 +41,9 @@ class MainActivity : AppCompatActivity() {
                 auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            // Login bem-sucedido
                             startActivity(Intent(this, RiscosRegistradosActivity::class.java))
                             finish()
                         } else {
-                            // Falha no login (senha errada, usuário não existe, etc)
                             Toast.makeText(this, "E-mail ou senha incorretos.", Toast.LENGTH_SHORT).show()
                         }
                     }
