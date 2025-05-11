@@ -37,7 +37,6 @@ class CadastroActivity : AppCompatActivity() {
                 val senha = findViewById<TextInputLayout>(R.id.editSenha).editText?.text.toString().trim()
                 val setor = findViewById<TextInputLayout>(R.id.editSetor).editText?.text.toString().trim()
 
-                // 1. Cria o usuário no Auth
                 auth.createUserWithEmailAndPassword(email, senha)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -55,6 +54,7 @@ class CadastroActivity : AppCompatActivity() {
                             ref.child(userId).setValue(userData)
                                 .addOnSuccessListener {
                                     Toast.makeText(this, "Cadastro salvo com sucesso!", Toast.LENGTH_SHORT).show()
+                                    auth.signOut()
                                     startActivity(Intent(this, MainActivity::class.java))
                                     finish()
                                 }
