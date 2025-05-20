@@ -11,8 +11,6 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
-
-
 class CadastroActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -37,34 +35,48 @@ class CadastroActivity : AppCompatActivity() {
                 val senha = findViewById<TextInputLayout>(R.id.editSenha).editText?.text.toString().trim()
                 val setor = findViewById<TextInputLayout>(R.id.editSetor).editText?.text.toString().trim()
 
-                auth.createUserWithEmailAndPassword(email, senha)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            val userId = auth.currentUser?.uid ?: ""
-                            // 2. Salva os dados no Realtime Database usando o UID
-                            val database = FirebaseDatabase.getInstance()
-                            val ref = database.getReference("usuario")
-                            val userData = mapOf(
-                                "nome" to nome,
-                                "email" to email,
-                                "cpf" to cpf,
-                                "setor" to setor,
-                                "user_id" to userId
-                            )
-                            ref.child(userId).setValue(userData)
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "Cadastro salvo com sucesso!", Toast.LENGTH_SHORT).show()
-                                    auth.signOut()
-                                    startActivity(Intent(this, MainActivity::class.java))
-                                    finish()
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(this, "Erro ao salvar: ${it.message}", Toast.LENGTH_LONG).show()
-                                }
-                        } else {
-                            Toast.makeText(this, "Erro ao cadastrar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                // Verifica se já existe usuário com o mesmo CPF
+                val database = FirebaseDatabase.getInstance()
+                val ref = database.getReference("usuario")
+                ref.orderByChild("cpf").equalTo(cpf)
+                    .addListenerForSingleValueEvent(object : com.google.firebase.database.ValueEventListener {
+                        override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
+                            if (snapshot.exists()) {
+                                Toast.makeText(this@CadastroActivity, "Já existe um usuário cadastrado com este CPF.", Toast.LENGTH_LONG).show()
+                            } else {
+                                // CPF não existe, pode cadastrar
+                                auth.createUserWithEmailAndPassword(email, senha)
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            val userId = auth.currentUser?.uid ?: ""
+                                            val userData = mapOf(
+                                                "nome" to nome,
+                                                "email" to email,
+                                                "cpf" to cpf,
+                                                "setor" to setor,
+                                                "user_id" to userId
+                                            )
+                                            ref.child(userId).setValue(userData)
+                                                .addOnSuccessListener {
+                                                    Toast.makeText(this@CadastroActivity, "Cadastro salvo com sucesso!", Toast.LENGTH_SHORT).show()
+                                                    auth.signOut()
+                                                    startActivity(Intent(this@CadastroActivity, MainActivity::class.java))
+                                                    finish()
+                                                }
+                                                .addOnFailureListener {
+                                                    Toast.makeText(this@CadastroActivity, "Erro ao salvar: ${it.message}", Toast.LENGTH_LONG).show()
+                                                }
+                                        } else {
+                                            Toast.makeText(this@CadastroActivity, "Erro ao cadastrar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                            }
                         }
-                    }
+
+                        override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
+                            Toast.makeText(this@CadastroActivity, "Erro ao verificar CPF: ${error.message}", Toast.LENGTH_LONG).show()
+                        }
+                    })
             }
         }
 

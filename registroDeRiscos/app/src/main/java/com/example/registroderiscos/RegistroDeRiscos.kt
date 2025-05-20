@@ -19,6 +19,10 @@ import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 class RegistroDeRiscos : AppCompatActivity() {
 
@@ -64,7 +68,7 @@ class RegistroDeRiscos : AppCompatActivity() {
         val tipos = arrayOf("Químico", "Físico", "Ergonômico", "Biológico", "Outros")
         spinnerTipo.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, tipos)
 
-        val niveis = arrayOf("1 - Baixo", "2", "3", "4", "5 - Crítico")
+        val niveis = arrayOf("1 - Baixo", "2 - Médio", "3 - Alto", "4 - Crítico", "5 - Fatal")
         spinnerNivel.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, niveis)
 
         btnFoto.setOnClickListener {
@@ -139,7 +143,12 @@ class RegistroDeRiscos : AppCompatActivity() {
             return
         }
 
-        // Crie o objeto Risco usando a data class, incluindo latitude e longitude
+        // Gere a data atual apenas com dia, mês e ano no fuso de Brasília
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+        dateFormat.timeZone = TimeZone.getTimeZone("America/Sao_Paulo")
+        val dataAtual = dateFormat.format(Date())
+
+        // Crie o objeto Risco usando a data class, incluindo latitude, longitude e data
         val risco = Risco(
             descricao = descricao,
             foto = imagem,
@@ -147,7 +156,8 @@ class RegistroDeRiscos : AppCompatActivity() {
             nivel_risco = nivelRisco,
             tipo_risco = tipoRisco,
             latitude = latitude,
-            longitude = longitude
+            longitude = longitude,
+            data = dataAtual // <-- Passe a data aqui
         )
 
         val referencia = FirebaseDatabase.getInstance().getReference("risco").child(userId)
