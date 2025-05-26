@@ -141,7 +141,7 @@ class RegistroDeRiscos : AppCompatActivity() {
             return
         }
 
-        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         dateFormat.timeZone = TimeZone.getTimeZone("America/Sao_Paulo")
         val dataAtual = dateFormat.format(Date())
 
