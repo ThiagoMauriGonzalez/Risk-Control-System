@@ -99,8 +99,6 @@ class RegistroDeRiscos : AppCompatActivity() {
             if (location != null) {
                 latitude = location.latitude
                 longitude = location.longitude
-                // Se quiser, pode preencher o campo de localização automaticamente:
-                // editLocal.setText("Lat: $latitude, Lon: $longitude")
             }
         }
     }
@@ -143,12 +141,10 @@ class RegistroDeRiscos : AppCompatActivity() {
             return
         }
 
-        // Gere a data atual apenas com dia, mês e ano no fuso de Brasília
         val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         dateFormat.timeZone = TimeZone.getTimeZone("America/Sao_Paulo")
         val dataAtual = dateFormat.format(Date())
 
-        // Crie o objeto Risco usando a data class, incluindo latitude, longitude e data
         val risco = Risco(
             descricao = descricao,
             foto = imagem,
